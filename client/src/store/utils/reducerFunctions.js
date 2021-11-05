@@ -18,7 +18,7 @@ import _ from "lodash";
  export const addMessageToStore = (state, payload) => {
   
   const { message, sender } = payload;
-  let clone = _.cloneDeep(state); // to ensure proper render, must be deep copy of nested state
+  let clone = _.cloneDeep(state); 
 
   if (sender === null) 
   {
