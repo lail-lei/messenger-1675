@@ -1,11 +1,11 @@
 import {
-  addNewConvoToStore,
+  startConversationInStore,
   addOnlineUserToStore,
   addSearchedUsersToStore,
   removeOfflineUserFromStore,
   addMessageToStore,
 } from "./utils/reducerFunctions";
-
+ 
 // ACTIONS
 
 const GET_CONVERSATIONS = "GET_CONVERSATIONS";
@@ -86,7 +86,7 @@ const reducer = (state = [], action) => {
     case CLEAR_SEARCHED_USERS:
       return state.filter((convo) => convo.id);
     case ADD_CONVERSATION:
-      return addNewConvoToStore(
+      return startConversationInStore(
         state,
         action.payload.recipientId,
         action.payload.newMessage

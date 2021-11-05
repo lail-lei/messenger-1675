@@ -14,7 +14,7 @@ axios.interceptors.request.use(async function (config) {
 
   return config;
 });
-
+  
 // USER THUNK CREATORS
 
 export const fetchUser = () => async (dispatch) => {
@@ -84,6 +84,7 @@ const saveMessage = async (body) => {
 };
 
 const sendMessage = (data, body) => {
+
   socket.emit("new-message", {
     message: data.message,
     recipientId: body.recipientId,
@@ -92,18 +93,26 @@ const sendMessage = (data, body) => {
 };
 
 // message format to send: {recipientId, text, conversationId}
-// conversationId will be set to null if its a brand new conversation
-export const postMessage = (body) => (dispatch) => {
-  try {
-    const data = saveMessage(body);
+export const postMessage = (body) => async (dispatch) => {
+  
+    try {
+      
+      // FIX: this was returning a promise before
+      const data = await saveMessage(body);
 
-    if (!body.conversationId) {
-      dispatch(addConversation(body.recipientId, data.message));
-    } else {
-      dispatch(setNewMessage(data.message));
-    }
+      // conversationId will be set to null if its a brand new conversation
+      // dispatch to create a conversation with the recipient and 
+      // store first message
+      if (!body.conversationId) 
+        dispatch(addConversation(body.recipientId, data.message)); 
+      
+      // dispatch to add new message to existing conversation
+      else 
+        dispatch(setNewMessage(data.message));
+      
+      // now, send the message to the server
+      sendMessage(data, body);
 
-    sendMessage(data, body);
   } catch (error) {
     console.error(error);
   }
