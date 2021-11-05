@@ -84,7 +84,6 @@ const saveMessage = async (body) => {
 };
 
 const sendMessage = (data, body) => {
-
   socket.emit("new-message", {
     message: data.message,
     recipientId: body.recipientId,
@@ -92,25 +91,33 @@ const sendMessage = (data, body) => {
   });
 };
 
-// message format to send: {recipientId, text, conversationId}
+/**
+ * Precondition: body.conversationId will be set to null 
+ * if user is sending a message to a brand new conversation.
+ *
+ * Performs these actions:
+ *    1) makes http post request to server to record message in database. 
+ *    2) posts the new message in the client's store. 
+ *    3) sends message (and sender info, if new conversation) to server socket
+ * 
+ * If brand new conversation, dispatch to 
+ * add new message to "fake"/empty conversation (created when searched for recipient).
+ * Else, dispatch to post new message to existing conversation in store.
+ * 
+ * @param {*} body, contains {text, conversationId, recipientId, sender (optional)}
+ */
+
 export const postMessage = (body) => async (dispatch) => {
   
     try {
-      
-      // FIX: this was returning a promise before
+      // returned data format = {message : {}, sender : null || {}}
       const data = await saveMessage(body);
-
-      // conversationId will be set to null if its a brand new conversation
-      // dispatch to create a conversation with the recipient and 
-      // store first message
+      
       if (!body.conversationId) 
         dispatch(addConversation(body.recipientId, data.message)); 
-      
-      // dispatch to add new message to existing conversation
       else 
         dispatch(setNewMessage(data.message));
       
-      // now, send the message to the server
       sendMessage(data, body);
 
   } catch (error) {
