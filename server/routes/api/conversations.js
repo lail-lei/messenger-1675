@@ -11,8 +11,9 @@ router.get("/", async (req, res, next) => {
     if (!req.user) {
       return res.sendStatus(401);
     }
-    const userId = req.user.id;
-
+  
+  const userId = req.user.id;
+  
   const conversations = await Conversation.findAll({
     where: {
       [Op.or]: {
@@ -21,15 +22,15 @@ router.get("/", async (req, res, next) => {
       }
     },
     attributes: {
-        include: [
-            [
+        include: [ 
+              [
                 Sequelize.literal(`(
                      SELECT MAX("messages"."createdAt")
                      FROM "messages"
                      WHERE "messages"."conversationId" = "conversation"."id"
                 )`),
                 'latestMessage'
-            ]
+              ]
         ]
     },
     order: [
@@ -39,26 +40,26 @@ router.get("/", async (req, res, next) => {
     include: [
           {model: Message},
           {
-          model: User,
-          as: "user1",
-          where: {
-            id: {
-              [Op.not]: userId,
+            model: User,
+            as: "user1",
+            where: {
+              id: {
+                [Op.not]: userId,
+              },
             },
-          },
-          attributes: ["id", "username", "photoUrl"],
-          required: false,
+            attributes: ["id", "username", "photoUrl"],
+            required: false,
         },
         {
-          model: User,
-          as: "user2",
-          where: {
-            id: {
-              [Op.not]: userId,
+            model: User,
+            as: "user2",
+            where: {
+              id: {
+                [Op.not]: userId,
+              },
             },
-          },
-          attributes: ["id", "username", "photoUrl"],
-          required: false,
+            attributes: ["id", "username", "photoUrl"],
+            required: false,
         }
     
     ],
@@ -86,10 +87,17 @@ router.get("/", async (req, res, next) => {
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[convoJSON.messages.length-1].text;
+
+      convoJSON.unread = await Message.count({where: {
+                                                      conversationId: convoJSON.id, 
+                                                      senderId : {[Op.not]: userId},
+                                                      readAt : { [Op.is]: null},
+                                                    }
+                                          })
+
       conversations[i] = convoJSON;
      }
-
-    res.json(conversations);
+    return res.json(conversations);
   } catch (error) {
     next(error);
   }
