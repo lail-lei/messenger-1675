@@ -70,6 +70,22 @@ export const addNewConvoToStore = (state, recipientId, message) => {
   return addMessagetoConversation(state, index, message);
 };
 
+const updateReads = (state, conversationId, incrementing) => {
+  let clone = [...state];
+  let index = clone.findIndex(element => element.id === conversationId);
+  let clonedConvo = {...clone[index]};
+  if (incrementing) clonedConvo.unread++;
+  else clonedConvo.unread = 0;
+  clone[index] = clonedConvo;
+  return clone;
+}
 
+export const readMessagesInStore = (state, conversationId) => {
+  return updateReads(state, conversationId);
+}
+
+export const incrementUnreadInStore = (state, conversationId) => {
+  return updateReads(state, conversationId, true);
+}
 
  
