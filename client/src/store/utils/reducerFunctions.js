@@ -1,31 +1,3 @@
-
-const addMessagetoConversation = (state, index, message) => {
-  let clone = [...state];
-  let clonedConvo = {...clone[index]};
-  clonedConvo.messages = [...clone[index].messages, message];
-  clonedConvo.latestMessageText = message.text;
-  clone[index] = clonedConvo;
-  return clone;
-} 
-
-export const addMessageToStore = (state, payload) => {
-  const { message, sender } = payload;
-  
-  if (sender === null) 
-  {
-    let index = state.findIndex(element => element.id === message.conversationId);
-    return addMessagetoConversation(state, index, message);
-  }
-
-  const newConvo = {
-    id: message.conversationId,
-    otherUser: sender,
-    messages: [message],
-    latestMessageText : message.text
-  };
-  return [newConvo, ...state];
-};
-
 export const addOnlineUserToStore = (state, id) => {
   return state.map((convo) => {
     if (convo.otherUser.id === id) {
@@ -52,12 +24,10 @@ export const removeOfflineUserFromStore = (state, id) => {
 
 export const addSearchedUsersToStore = (state, users) => {
   const currentUsers = {};
-
   // make table of current users so we can lookup faster
   state.forEach((convo) => {
     currentUsers[convo.otherUser.id] = true;
   });
-
   const newState = [...state];
   users.forEach((user) => {
     // only create a fake convo if we don't already have a convo with this user
@@ -66,10 +36,34 @@ export const addSearchedUsersToStore = (state, users) => {
       newState.push(fakeConvo);
     }
   });
-
   return newState;
 };
 
+
+const addMessagetoConversation = (state, index, message) => {
+  let clonedConvo = {...state[index]};
+  clonedConvo.messages = [...state[index].messages, message];
+  clonedConvo.latestMessageText = message.text;
+  state.splice(index, 1);
+  return [clonedConvo, ...state];
+} 
+
+export const addMessageToStore = (state, payload) => {
+  const { message, sender } = payload;
+  if (sender === null) 
+  {
+    let index = state.findIndex(element => element.id === message.conversationId);
+    return addMessagetoConversation(state, index, message);
+  }
+  const newConvo = {
+    id: message.conversationId,
+    otherUser: sender,
+    messages: [message],
+    latestMessageText : message.text,
+    unread: 1
+  };
+  return [newConvo, ...state];
+};
 
 export const addNewConvoToStore = (state, recipientId, message) => {
   let index = state.findIndex(element => element.otherUser.id === recipientId);
@@ -77,3 +71,5 @@ export const addNewConvoToStore = (state, recipientId, message) => {
 };
 
 
+
+ 
