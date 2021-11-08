@@ -91,35 +91,15 @@ const sendMessage = (data, body) => {
   });
 };
 
-/**
- * Precondition: body.conversationId will be set to null 
- * if user is sending a message to a brand new conversation.
- *
- * Performs these actions:
- *    1) makes http post request to server to record message in database. 
- *    2) posts the new message in the client's store. 
- *    3) sends message (and sender info, if new conversation) to server socket
- * 
- * If brand new conversation, dispatch to 
- * add new message to "fake"/empty conversation (created when searched for recipient).
- * Else, dispatch to post new message to existing conversation in store.
- * 
- * @param {*} body, contains {text, conversationId, recipientId, sender (optional)}
- */
-
 export const postMessage = (body) => async (dispatch) => {
   
     try {
-      // returned data format = {message : {}, sender : null || {}}
       const data = await saveMessage(body);
-      
       if (!body.conversationId) 
         dispatch(addConversation(body.recipientId, data.message)); 
       else 
         dispatch(setNewMessage(data.message));
-      
       sendMessage(data, body);
-
   } catch (error) {
     console.error(error);
   }
