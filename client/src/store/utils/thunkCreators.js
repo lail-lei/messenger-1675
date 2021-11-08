@@ -5,7 +5,10 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  readMessages,
+  incrementUnread
 } from "../conversations";
+import { setActiveChat } from "../activeConversation"
 import { gotUser, setFetchingStatus } from "../user";
 
 axios.interceptors.request.use(async function (config) {
@@ -91,6 +94,10 @@ const sendMessage = (data, body) => {
   });
 };
 
+const updateReadsInDB = async (id) => {
+  await axios.patch("/api/messages/read", {conversationId: id});
+}
+
 export const postMessage = (body) => async (dispatch) => {
     try {
       const data = await saveMessage(body);
@@ -112,3 +119,46 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
     console.error(error);
   }
 };
+
+export const assignActiveChat = (username, id, unread) => async (dispatch) => {
+  try{
+    if (unread) {
+      updateReadsInDB(id);
+      dispatch(readMessages(id));
+    }
+    dispatch(setActiveChat(username));
+  }
+  catch (error) {
+    console.error(error);
+  }
+
+}
+ 
+export const receiveMessage = (data) => async (dispatch, getState) => {
+  const { message, sender } = data;
+  const { activeConversation, conversations } = getState();
+  if (activeConversation) 
+  {
+    const activeId = conversations.reduce((id, convo) => {
+              if (convo.otherUser.username === activeConversation) id = convo.id;
+              return id;
+          }, -1);
+        
+    // set time out?
+      if (message.conversationId === activeId)
+      {
+          updateReadsInDB(activeId);
+          dispatch(readMessages(activeId));
+      } 
+      else
+      {
+        dispatch(incrementUnread(message.conversationId));
+      } 
+      dispatch(setNewMessage(message, sender));
+      }
+      else 
+      {
+        dispatch(incrementUnread(message.conversationId));
+        dispatch(setNewMessage(message, sender));
+      }
+}
