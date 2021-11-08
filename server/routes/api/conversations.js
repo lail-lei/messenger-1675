@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const { User, Conversation, Message } = require("../../db/models");
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const onlineUsers = require("../../onlineUsers");
+
 
 // get all conversations for a user, include latest message text for preview, and all messages
 // include other user model so we have info on username/profile pic (don't include current user info)
@@ -11,20 +12,33 @@ router.get("/", async (req, res, next) => {
       return res.sendStatus(401);
     }
     const userId = req.user.id;
-    const conversations = await Conversation.findAll({
-      where: {
-        [Op.or]: {
-          user1Id: userId,
-          user2Id: userId,
-        },
-      },
-      attributes: ["id"],
-      order: [["updatedAt", "DESC"],
-              [Message, "createdAt", "ASC"]
-            ],
-      include: [
-        { model: Message },
-        {
+
+  const conversations = await Conversation.findAll({
+    where: {
+      [Op.or]: {
+        user1Id: userId,
+        user2Id: userId,
+      }
+    },
+    attributes: {
+        include: [
+            [
+                Sequelize.literal(`(
+                     SELECT MAX("messages"."createdAt")
+                     FROM "messages"
+                     WHERE "messages"."conversationId" = "conversation"."id"
+                )`),
+                'latestMessage'
+            ]
+        ]
+    },
+    order: [
+        [Sequelize.literal('"latestMessage"'), 'DESC'],
+        [Message, "createdAt", "ASC"]
+    ],
+    include: [
+          {model: Message},
+          {
           model: User,
           as: "user1",
           where: {
@@ -46,14 +60,13 @@ router.get("/", async (req, res, next) => {
           attributes: ["id", "username", "photoUrl"],
           required: false,
         }
-      ],
-    });
+    
+    ],
+  });
 
-
-    for (let i = 0; i < conversations.length; i++) {
+  for (let i = 0; i < conversations.length; i++) {
       const convo = conversations[i];
       const convoJSON = convo.toJSON();
-     
     
       // set a property "otherUser" so that frontend will have easier access
       if (convoJSON.user1) {
