@@ -42,7 +42,7 @@ export const addSearchedUsersToStore = (state, users) => {
 const addMessagetoConversation = (state, index, message) => {
   let clone = [...state];
   let clonedConvo = {...clone[index]};
-  if (!clonedConvo.id) clonedConvo.id = message.id;
+  if (!clonedConvo.id) clonedConvo.id = message.conversationId;
   clonedConvo.messages = [...clone[index].messages, message];
   clonedConvo.latestMessageText = message.text;
   clone.splice(index, 1);
