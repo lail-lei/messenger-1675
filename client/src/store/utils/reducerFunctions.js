@@ -1,25 +1,29 @@
+
+const addMessagetoConversation = (state, index, message) => {
+  const clone = [...state];
+  const clonedConvo = {...clone[index]};
+  clonedConvo.messages = [...clone[index].messages, message];
+  clonedConvo.latestMessageText = message.text;
+  clone[index] = clonedConvo;
+  return clone;
+} 
+
 export const addMessageToStore = (state, payload) => {
   const { message, sender } = payload;
-  // if sender isn't null, that means the message needs to be put in a brand new convo
-  if (sender !== null) {
-    const newConvo = {
-      id: message.conversationId,
-      otherUser: sender,
-      messages: [message],
-    };
-    newConvo.latestMessageText = message.text;
-    return [newConvo, ...state];
+  
+  if (sender === null) 
+  {
+    let index = state.findIndex(element => element.id === message.conversationId);
+    return addMessagetoConversation(state, index, message);
   }
 
-  return state.map((convo) => {
-    if (convo.id === message.conversationId) {
-      convo.messages.push(message);
-      convo.latestMessageText = message.text;
-      return convo;
-    } else {
-      return convo;
-    }
-  });
+  const newConvo = {
+    id: message.conversationId,
+    otherUser: sender,
+    messages: [message],
+    latestMessageText : message.text
+  };
+  return [newConvo, ...state];
 };
 
 export const addOnlineUserToStore = (state, id) => {
@@ -66,15 +70,10 @@ export const addSearchedUsersToStore = (state, users) => {
   return newState;
 };
 
+
 export const addNewConvoToStore = (state, recipientId, message) => {
-  return state.map((convo) => {
-    if (convo.otherUser.id === recipientId) {
-      convo.id = message.conversationId;
-      convo.messages.push(message);
-      convo.latestMessageText = message.text;
-      return convo;
-    } else {
-      return convo;
-    }
-  });
+  const index = state.findIndex(element => element.otherUser.id === recipientId);
+  return addMessagetoConversation(state, index, message);
 };
+
+
