@@ -1,9 +1,10 @@
 import React from "react";
 import { Box } from "@material-ui/core";
-import { BadgeAvatar, ChatContent } from "../Sidebar";
+import { BadgeAvatar, ChatContent, NotificationBadge } from "../Sidebar";
 import { makeStyles } from "@material-ui/core/styles";
 import { assignActiveChat } from "../../store/utils/thunkCreators";
 import { connect } from "react-redux";
+import BadgeNotification from "./BadgeNotification";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,6 +39,7 @@ const Chat = (props) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
+      <BadgeNotification sidebar={true} count={`${conversation.unread}`}/>
     </Box>
   );
 };
