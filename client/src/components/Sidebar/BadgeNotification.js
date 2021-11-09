@@ -3,36 +3,35 @@ import { Box, Badge } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles(() => ({
- 
   badge: {
-    height: 13,
-    width: 13,
-    borderRadius: "50%",
-    border: "2px solid white",
-    fontSize: "100px",
-    backgroundColor: "#3A8DFF"
-  },
-  online: {
-    backgroundColor: "#1CED84"
+    borderRadius: 10,
+    backgroundColor: "#3F92FF",
+    fontWeight: "bold",
+    minWidth: 20,
+    lineHeight: 1,
+    padding: "0 8px",
+    height: 20,
+    fontSize: 10,
+    color: "#FFFFFF",
+    letterSpacing: -0.5,
   },
   sidebar: {
-    marginRight: 17
+    marginRight: 27 // derived from: (sidebar marginLeft + (midWidth/2)) = 17 + (20/2); 
   }
 }));
 
 const BadgeNotification  = (props) => {
   const classes = useStyles();
-  const { sidebar, count } = props;
+  const { sidebar, count, username } = props;
 
   return (
     <Box className={sidebar ? classes.sidebar : ""}>
       <Badge
+        aria-label={`${count} unread messages from ${username}`}
         classes={{ badge: classes.badge }}
-        variant="string"
+        variant="standard"
         badgeContent={count}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        overlap="circle">
-      </Badge>
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}/>
     </Box>
   );
 };
