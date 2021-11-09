@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 const Chat = (props) => {
   const classes = useStyles();
   const { conversation } = props;
-  const { otherUser } = conversation;
+  const { otherUser, unread } = conversation;
 
   const handleClick = async (conversation) => {
     const { id, otherUser, unread } = conversation;
@@ -39,7 +39,8 @@ const Chat = (props) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
-      <BadgeNotification sidebar={true} count={`${conversation.unread}`}/>
+      {unread > 0 &&
+       <BadgeNotification sidebar={true} count={`${unread}`} username={otherUser.username}/> }
     </Box>
   );
 };
