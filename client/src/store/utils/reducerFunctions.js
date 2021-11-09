@@ -1,7 +1,7 @@
 
 const addMessagetoConversation = (state, index, message) => {
-  let clone = [...state];
-  let clonedConvo = {...clone[index]};
+  const clone = [...state];
+  const clonedConvo = {...clone[index]};
   clonedConvo.messages = [...clone[index].messages, message];
   clonedConvo.latestMessageText = message.text;
   clone[index] = clonedConvo;
@@ -72,7 +72,7 @@ export const addSearchedUsersToStore = (state, users) => {
 
 
 export const addNewConvoToStore = (state, recipientId, message) => {
-  let index = state.findIndex(element => element.otherUser.id === recipientId);
+  const index = state.findIndex(element => element.otherUser.id === recipientId);
   return addMessagetoConversation(state, index, message);
 };
 
