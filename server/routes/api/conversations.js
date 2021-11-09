@@ -15,10 +15,11 @@ router.get("/", async (req, res, next) => {
 
     const conversations = await Conversation.findAll({
       where: {
-        [Op.or]: {
-          user1Id: userId,
-          user2Id: userId,
-        }
+        [Op.or]: 
+                {
+                  user1Id: userId,
+                  user2Id: userId,
+                }
       },
       attributes: {
           include: [
@@ -70,16 +71,19 @@ router.get("/", async (req, res, next) => {
         const convoJSON = convo.toJSON();
       
         // set a property "otherUser" so that frontend will have easier access
-        if (convoJSON.user1) {
+        if (convoJSON.user1) 
+        {
           convoJSON.otherUser = convoJSON.user1;
           delete convoJSON.user1;
-        } else if (convoJSON.user2) {
+        } else if (convoJSON.user2) 
+        {
           convoJSON.otherUser = convoJSON.user2;
           delete convoJSON.user2;
         }
 
         // set property for online status of the other user
-        if (onlineUsers.includes(convoJSON.otherUser.id)) {
+        if (onlineUsers.includes(convoJSON.otherUser.id)) 
+        {
           convoJSON.otherUser.online = true;
         } else {
           convoJSON.otherUser.online = false;
@@ -88,7 +92,6 @@ router.get("/", async (req, res, next) => {
         // set properties for notification count and latest message preview
         convoJSON.latestMessageText = convoJSON.messages[convoJSON.messages.length-1].text;
         conversations[i] = convoJSON;
-    }
 
       // set properties for notification count and latest message preview
       convoJSON.latestMessageText = convoJSON.messages[convoJSON.messages.length-1].text;
@@ -101,7 +104,9 @@ router.get("/", async (req, res, next) => {
                                           })
 
       conversations[i] = convoJSON;
-      
+
+    }
+
     return res.json(conversations);
 
   } catch (error) {
