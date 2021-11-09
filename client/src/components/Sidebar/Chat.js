@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@material-ui/core";
-import { BadgeAvatar, ChatContent, NotificationBadge } from "../Sidebar";
+import { BadgeAvatar, ChatContent } from "../Sidebar";
 import { makeStyles } from "@material-ui/core/styles";
 import { assignActiveChat } from "../../store/utils/thunkCreators";
 import { connect } from "react-redux";

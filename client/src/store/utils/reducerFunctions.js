@@ -39,7 +39,6 @@ export const addSearchedUsersToStore = (state, users) => {
   return newState;
 };
 
-
 const addMessagetoConversation = (state, index, message) => {
   let clone = [...state];
   let clonedConvo = {...clone[index]};
