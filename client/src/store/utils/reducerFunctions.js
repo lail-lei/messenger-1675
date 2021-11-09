@@ -41,11 +41,12 @@ export const addSearchedUsersToStore = (state, users) => {
 
 
 const addMessagetoConversation = (state, index, message) => {
-  let clonedConvo = {...state[index]};
-  clonedConvo.messages = [...state[index].messages, message];
+  let clone = [...state];
+  let clonedConvo = {...clone[index]};
+  clonedConvo.messages = [...clone[index].messages, message];
   clonedConvo.latestMessageText = message.text;
-  state.splice(index, 1);
-  return [clonedConvo, ...state];
+  clone.splice(index, 1);
+  return [clonedConvo, ...clone];
 } 
 
 export const addMessageToStore = (state, payload) => {
