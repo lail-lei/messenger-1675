@@ -50,19 +50,24 @@ router.patch("/read", async (req, res, next) => {
     if (!req.user) {
       return res.sendStatus(401);
     }
-    
+
     const userId = req.user.id;
     const { conversationId } = req.body;
+    const validated = await Conversation.validateUser(userId, conversationId);
     
-    await Message.update({readAt: Sequelize.fn('NOW')}, 
+    if (!validated) {
+      return res.sendStatus(403);
+    }
+    
+    await Message.update({read: true}, 
             {where: {
-               readAt : { [Op.is]: null},
+               read : { [Op.is]: false},
                conversationId : conversationId,
                senderId: {[Op.not]: userId},
             } 
     });
     
-    return res.sendStatus(200);
+    return res.sendStatus(204);
   }
   catch (error) {
     next(error);
