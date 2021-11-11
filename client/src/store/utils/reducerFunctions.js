@@ -41,7 +41,7 @@ export const addSearchedUsersToStore = (state, users) => {
 
 const addMessagetoConversation = (state, index, message) => {
   let clone = [...state];
-  let clonedConvo = {...clone[index]};
+  const clonedConvo = {...clone[index]};
   if (!clonedConvo.id) clonedConvo.id = message.conversationId;
   clonedConvo.messages = [...clone[index].messages, message];
   clonedConvo.latestMessageText = message.text;
@@ -72,9 +72,9 @@ export const addNewConvoToStore = (state, recipientId, message) => {
 };
 
 const updateReads = (state, conversationId, incrementing) => {
-  let clone = [...state];
-  let index = clone.findIndex(element => element.id === conversationId);
-  let clonedConvo = {...clone[index]};
+  const clone = [...state];
+  const index = clone.findIndex(element => element.id === conversationId);
+  const clonedConvo = {...clone[index]};
   if (incrementing) clonedConvo.unread++;
   else clonedConvo.unread = 0;
   clone[index] = clonedConvo;
@@ -89,4 +89,12 @@ export const incrementUnreadInStore = (state, conversationId) => {
   return updateReads(state, conversationId, true);
 }
 
- 
+export const updateReadReceiptInStore = (state, data) => {
+  const { conversationId, messageId } = data;
+  const clone = [...state];
+  const index = clone.findIndex(element => element.id === conversationId);
+  const clonedConvo = {...clone[index]};
+  clonedConvo.lastReadByFriend = messageId;
+  clone[index] = clonedConvo;
+  return clone;
+}

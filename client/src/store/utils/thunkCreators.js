@@ -94,6 +94,13 @@ const sendMessage = (data, body) => {
   });
 };
 
+const sendReadStatus = (messageId, conversationId) => {
+  socket.emit("read-message", {
+    messageId : messageId,
+    conversationId: conversationId
+  });
+}
+
 const updateReadsInDB = async (id) => await axios.patch("/api/messages/read", {conversationId: id});
 
 export const postMessage = (body) => async (dispatch) => {
@@ -122,12 +129,13 @@ export const searchUsers = (searchTerm) => async (dispatch) => {
   }
 };
 
-export const assignActiveChat = (username, id, unread) => async (dispatch) => {
+export const assignActiveChat = (username, id, unread, last) => async (dispatch) => {
   try {
       if (unread) 
       {
         updateReadsInDB(id);
         dispatch(readMessages(id));
+        sendReadStatus(last, id);
       } 
       dispatch(setActiveChat(username));
   }
@@ -148,10 +156,10 @@ export const receiveMessage = (data) => async (dispatch, getState) => {
           return id;
         }, -1);
             
-        // set time out? or use a kind of caching so not constantly pinging server?
         if (message.conversationId === activeId)
         {
           updateReadsInDB(activeId);
+          sendReadStatus(message.id, message.conversationId);
           dispatch(readMessages(activeId));
         } 
         else
