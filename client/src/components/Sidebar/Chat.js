@@ -26,8 +26,8 @@ const Chat = (props) => {
   const { otherUser, unread } = conversation;
 
   const handleClick = async (conversation) => {
-    const { id, otherUser, unread } = conversation;
-    await props.setActiveChat(otherUser.username, id, unread);
+    const { id, otherUser, unread, messages } = conversation;
+    await props.setActiveChat(otherUser.username, id, unread, messages[messages.length-1].id);
   };
 
   return (
@@ -47,8 +47,8 @@ const Chat = (props) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setActiveChat: (username, id, unread) => {
-      dispatch(assignActiveChat(username, id, unread));
+    setActiveChat: (username, id, unread, last) => {
+      dispatch(assignActiveChat(username, id, unread, last));
     }
   };
 };
