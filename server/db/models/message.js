@@ -10,9 +10,9 @@ const Message = db.define("message", {
     type: Sequelize.INTEGER,
     allowNull: false,
   },
-  readAt: {
-    type: Sequelize.DATE,
-    allowNull: true,
+  read: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: false,
   }
 });
 
