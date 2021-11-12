@@ -5,7 +5,10 @@ import {
   addConversation,
   setNewMessage,
   setSearchedUsers,
+  readMessages,
+  incrementUnread
 } from "../conversations";
+import { setActiveChat } from "../activeConversation"
 import { gotUser, setFetchingStatus } from "../user";
 
 axios.interceptors.request.use(async function (config) {
@@ -91,13 +94,26 @@ const sendMessage = (data, body) => {
   });
 };
 
+const sendReadStatus = (messageId, conversationId) => {
+  socket.emit("read-message", {
+    messageId : messageId,
+    conversationId: conversationId
+  });
+}
+
+const updateReadsInDB = async (id) => await axios.patch("/api/messages/read", {conversationId: id});
+
 export const postMessage = (body) => async (dispatch) => {
-    try {
+  try {
       const data = await saveMessage(body);
       if (!body.conversationId) 
+      {
         dispatch(addConversation(body.recipientId, data.message)); 
-      else 
+      }
+      else
+      {
         dispatch(setNewMessage(data.message));
+      }
       sendMessage(data, body);
   } catch (error) {
     console.error(error);
@@ -106,9 +122,58 @@ export const postMessage = (body) => async (dispatch) => {
 
 export const searchUsers = (searchTerm) => async (dispatch) => {
   try {
-    const { data } = await axios.get(`/api/users/${searchTerm}`);
-    dispatch(setSearchedUsers(data));
+      const { data } = await axios.get(`/api/users/${searchTerm}`);
+      dispatch(setSearchedUsers(data));
   } catch (error) {
     console.error(error);
   }
 };
+
+export const assignActiveChat = (username, id, unread, last) => async (dispatch) => {
+  try {
+      if (unread) 
+      {
+        updateReadsInDB(id);
+        dispatch(readMessages(id));
+        sendReadStatus(last, id);
+      } 
+      dispatch(setActiveChat(username));
+  }
+  catch (error) {
+    console.error(error);
+  }
+}
+ 
+export const receiveMessage = (data) => async (dispatch, getState) => {
+  try {
+      const { message, sender } = data;
+      const { activeConversation, conversations } = getState();
+      if (activeConversation) 
+      {
+        const activeId = conversations.reduce((id, convo) => 
+        {
+          if (convo.otherUser.username === activeConversation) id = convo.id;
+          return id;
+        }, -1);
+            
+        if (message.conversationId === activeId)
+        {
+          updateReadsInDB(activeId);
+          sendReadStatus(message.id, message.conversationId);
+          dispatch(readMessages(activeId));
+        } 
+        else
+        {
+          dispatch(incrementUnread(message.conversationId));
+        } 
+        dispatch(setNewMessage(message, sender));
+      }
+      else 
+      {
+        dispatch(incrementUnread(message.conversationId));
+        dispatch(setNewMessage(message, sender));
+      }
+  } catch (error) {
+    console.error(error);
+  }
+}

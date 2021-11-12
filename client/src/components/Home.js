@@ -11,6 +11,10 @@ import { clearOnLogout } from "../store/index";
 const useStyles = makeStyles((theme) => ({
   root: {
     height: "100vh"
+  },
+  logout: {
+    ...theme.typography.button,
+    ...theme.typography.bold
   }
 }));
 

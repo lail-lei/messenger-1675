@@ -10,29 +10,30 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   username: {
-    fontWeight: "bold",
-    letterSpacing: -0.2,
+    ...theme.typography.sidebarHeading,
+    ...theme.typography.bold,
+    
   },
   previewText: {
-    fontSize: 12,
-    color: "#9CADC8",
-    letterSpacing: -0.17,
+    ...theme.typography.sidebarSubheading,
+    ...theme.typography.bold,
   },
+  unread: {
+    ...theme.typography.boldBlack,
+  }
 }));
 
 const ChatContent = (props) => {
   const classes = useStyles();
-
   const { conversation } = props;
-  const { latestMessageText, otherUser } = conversation;
-
+  const { latestMessageText, otherUser, unread } = conversation;
   return (
     <Box className={classes.root}>
       <Box>
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={classes.previewText}>
+        <Typography className={`${classes.previewText} ${unread > 0 && classes.unread}`}>
           {latestMessageText}
         </Typography>
       </Box>
